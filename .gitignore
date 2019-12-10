@@ -1,0 +1,6 @@
+# Input data
+input.txt
+#VS Code config
+.vscode/
+# Debug logs
+runlog.txt
