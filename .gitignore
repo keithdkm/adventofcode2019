@@ -1,5 +1,5 @@
 # Input data
-input.txt
+*.txt
 #VS Code config
 .vscode/
 # Debug logs
