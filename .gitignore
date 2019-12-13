@@ -4,3 +4,5 @@
 .vscode/
 # Debug logs
 runlog.txt
+# Python files
+*.pyc
