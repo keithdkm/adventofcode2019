@@ -244,6 +244,9 @@ class PROGS():
     EQUALS8I = [3,3,1108,-1,8,3,4,3,99 ]
     #  Using immediate mode, consider whether the input is less than 8; output 1 (if it is) or 0 (if it is not).
     LESSTHAN8I = [3,3,1107,-1,8,3,4,3,99]
+    # Positional jump test
+    JUMPTESTP = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
+    JUMPTESTI = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
 
 if __name__ == "__main__":
 
@@ -267,15 +270,18 @@ if __name__ == "__main__":
     # simple_multiply.run()
     # print (simple_multiply.memory)
     # print(diagnostic_test)
-    equals8p = Intcode_computer("Equals 8 positional",PROGS.EQUALS8P)
-    equals8p.run()
-    lessthan8p = Intcode_computer("Less than 8 positional",PROGS.LESSTHAN8P)
-    lessthan8p.run()
-    equals8i = Intcode_computer("Equals 8 immediate",PROGS.EQUALS8I)
-    equals8i.run()
-    lessthan8i = Intcode_computer("Less than 8 immediate",PROGS.LESSTHAN8I)
-    lessthan8i.run()
-
+    # equals8p = Intcode_computer("Equals 8 positional",PROGS.EQUALS8P)
+    # equals8p.run()
+    # lessthan8p = Intcode_computer("Less than 8 positional",PROGS.LESSTHAN8P)
+    # lessthan8p.run()
+    # equals8i = Intcode_computer("Equals 8 immediate",PROGS.EQUALS8I)
+    # equals8i.run()
+    # lessthan8i = Intcode_computer("Less than 8 immediate",PROGS.LESSTHAN8I)
+    # lessthan8i.run()
+    jumptestp = Intcode_computer("Jump test positional", PROGS.JUMPTESTP)
+    jumptestp.run()
+    jumptesti = Intcode_computer("Jump test immediate", PROGS.JUMPTESTI)
+    jumptesti.run()
 
 
 
