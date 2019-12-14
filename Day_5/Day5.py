@@ -83,9 +83,33 @@ class Intcode_computer():
         ### OPERATIONS
         # one for each operation the computer can execute    
        
+
+
+        def add(mode): 
+            '''
+            Op code 01 - fetches two operands, multiples them together and stores in the location
+            identified by third operand
+            '''
+            x,y = fetch_operands(mode,2)   # 
+            self.memory[self.memory[self.pointer]] = x+y
+
+            self.pointer += 1
+
+            return True
+
+        def multiply(mode):
+            '''
+            Op code 02 - fetches two operands, multiples them together and stores in the location
+            identified by third operand
+            '''
+            x,y = fetch_operands(mode,2)
+            self.memory[self.memory[self.pointer]] = x*y
+            self.pointer += 1
+            return True
+
         def input_integer(mode=None):
             '''
-            Prompts user to enter integer
+            Opcode 03 Prompts user to enter integer and stores it at the address in the operand
             '''
             no_integer_entered = True
             while no_integer_entered:
@@ -106,40 +130,65 @@ class Intcode_computer():
 
         def output_memory_location(mode):
             '''
-            outputs the data to the memory location stored at the pointer
-            always functions in postion mode
+            Opcode 04 -outputs to stdout the data stored at the memory location in the operand
             '''
             logger.debug(f'Output {self.memory[self.memory[self.pointer]]}')
             logger.debug(f'Pointer is {self.pointer}')
             operand = fetch_operands(0,1)
-            print(operand[0])            
+            print(operand[0])
 
             # self.pointer += 1 # increment pointer to next instruction
             return 1 
-
-        def add(mode): 
+            
+        def jump_if_true(mode):
             '''
-            fetches two operands, multiples them together and stores in the location
-            identified by third operand
-            '''
-            x,y = fetch_operands(mode,2)   # 
-            self.memory[self.memory[self.pointer]] = x+y
-
-            self.pointer += 1
-
-            return True
-
-        def multiply(mode):
-            '''
-            fetches two operands, multiples them together and stores in the location
-            identified by third operand
+            Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets 
+            the instruction pointer to the value from the second parameter. Otherwise, 
+            it does nothing.
             '''
             x,y = fetch_operands(mode,2)
-            self.memory[self.memory[self.pointer]] = x*y
-            self.pointer += 1
-            return True
 
-   
+            if x:
+                self.pointer = y
+            return
+
+        def jump_if_false(mode):
+            '''
+            Opcode 6 is jump-if-false: if the first parameter is zero, it sets the 
+            instruction pointer to the value from the second parameter. 
+            Otherwise, it does nothing.
+
+            '''
+            x,y = fetch_operands(mode,2)
+
+            if not x:
+                self.pointer = y
+            return
+
+
+        def less_than(mode):
+            '''
+            compares first two operands and puts a 1 in the mem location of third
+            operand if first is less than second. otherwise a zero
+            '''
+            x,y = fetch_operands(mode,2)
+
+            self.memory[self.memory[self.pointer]] = int(x<y)
+            self.pointer +=1 
+            return
+
+        def equals(mode):
+            '''
+            compares first two operands and puts a 1 in the mem location of third
+            operand if first is less than second, otherwise a zero
+            '''           
+            x,y = fetch_operands(mode,2)
+
+            self.memory[self.memory[self.pointer]] = int(x==y)
+            self.pointer += 1
+            return
+
+
         # Dictionary to call the correct function
         EXECUTE =  {1:add,  # computer instruction set
                     2:multiply,
@@ -150,10 +199,6 @@ class Intcode_computer():
                     7:less_than,
                     8:equals}
 
-    # Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
-    # Opcode 6 is jump-if-false: if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
-    # Opcode 7 is less than: if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
-    # Opcode 8 is equals: if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 
         ####
         ## Code starts
@@ -191,6 +236,14 @@ class PROGS():
     SIMPLE_ADD = [3,0,3,2,1,0,2,0,4,0,99]
     SIMPLE_MULTIPLY = [1002,4,3,4,33]
 
+    #  Using position mode, consider whether the input is equal to 8; output 1 (if it is) or 0 (if it is not).
+    EQUALS8P = [3,9,8,9,10,9,4,9,99,-1,8]
+    # Using position mode, consider whether the input is less than 8; output 1 (if it is) or 0 (if it is not).
+    LESSTHAN8P = [3,9,7,9,10,9,4,9,99,-1,8] 
+    # - Using immediate mode, consider whether the input is equal to 8; output 1 (if it is) or 0 (if it is not).
+    EQUALS8I = [3,3,1108,-1,8,3,4,3,99 ]
+    #  Using immediate mode, consider whether the input is less than 8; output 1 (if it is) or 0 (if it is not).
+    LESSTHAN8I = [3,3,1107,-1,8,3,4,3,99]
 
 if __name__ == "__main__":
 
@@ -202,8 +255,8 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
 
-    diagnostic_test = Intcode_computer("DIAGNOSTICS",PROGS.DIAGNOSTIC)
-    diagnostic_test.run()
+    # diagnostic_test = Intcode_computer("DIAGNOSTICS",PROGS.DIAGNOSTIC)
+    # diagnostic_test.run()
     
     # test_io = Intcode_computer("IO Test",PROGS.TEST)
     # test_io.run()
@@ -214,8 +267,14 @@ if __name__ == "__main__":
     # simple_multiply.run()
     # print (simple_multiply.memory)
     # print(diagnostic_test)
-
-
+    equals8p = Intcode_computer("Equals 8 positional",PROGS.EQUALS8P)
+    equals8p.run()
+    lessthan8p = Intcode_computer("Less than 8 positional",PROGS.LESSTHAN8P)
+    lessthan8p.run()
+    equals8i = Intcode_computer("Equals 8 immediate",PROGS.EQUALS8I)
+    equals8i.run()
+    lessthan8i = Intcode_computer("Less than 8 immediate",PROGS.LESSTHAN8I)
+    lessthan8i.run()
 
 
 
