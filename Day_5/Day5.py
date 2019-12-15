@@ -132,9 +132,9 @@ class Intcode_computer():
             '''
             Opcode 04 -outputs to stdout the data stored at the memory location in the operand
             '''
-            logger.debug(f'Output {self.memory[self.memory[self.pointer]]}')
+            # logger.debug(f'Output {self.memory[self.pointer]}')
             logger.debug(f'Pointer is {self.pointer}')
-            operand = fetch_operands(0,1)
+            operand = fetch_operands(mode,1)
             print(operand[0])
 
             # self.pointer += 1 # increment pointer to next instruction
@@ -248,9 +248,10 @@ class PROGS():
     JUMPTESTP = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
     JUMPTESTI = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
 
+    FIVETO9 = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]
+
 if __name__ == "__main__":
 
-    
     ##############################################
     ## Logging Configuration
     FORMAT = '%(asctime)-15s %(funcName)s:%(message)s'
@@ -258,8 +259,8 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
 
-    # diagnostic_test = Intcode_computer("DIAGNOSTICS",PROGS.DIAGNOSTIC)
-    # diagnostic_test.run()
+    diagnostic_test = Intcode_computer("DIAGNOSTICS",PROGS.DIAGNOSTIC)
+    diagnostic_test.run()
     
     # test_io = Intcode_computer("IO Test",PROGS.TEST)
     # test_io.run()
@@ -278,10 +279,12 @@ if __name__ == "__main__":
     # equals8i.run()
     # lessthan8i = Intcode_computer("Less than 8 immediate",PROGS.LESSTHAN8I)
     # lessthan8i.run()
-    jumptestp = Intcode_computer("Jump test positional", PROGS.JUMPTESTP)
-    jumptestp.run()
-    jumptesti = Intcode_computer("Jump test immediate", PROGS.JUMPTESTI)
-    jumptesti.run()
+    # jumptestp = Intcode_computer("Jump test positional", PROGS.JUMPTESTP)
+    # jumptestp.run()
+    # jumptesti = Intcode_computer("Jump test immediate", PROGS.JUMPTESTI)
+    # jumptesti.run()
+    # FIVETO9 = Intcode_computer("Opcodes 5 to 9", PROGS.FIVETO9)
+    # FIVETO9.run()
 
 
 
