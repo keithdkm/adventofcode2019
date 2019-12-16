@@ -1,21 +1,17 @@
 import operator as op
 import logging
+from itertools import permutations
 
 class Intcode_computer():
 
 
-    def __init__(self,program_name,program,i_o_mode=None):
+    def __init__(self,program_name,program):
 
         self.program = program
         self.memory = self.program[:] # 
         self.program_name = program_name
-        self.i_o_mode = i_o_mode
-        if self.i_o_mode:  # if data is present at input use that instead of input from keyboard
 
-            self.input_data = (i for i in self.i_o_mode)
-        else:
-            self.input_data = None
-
+        self.output_data = []
         logger.info(f"Program {self.program_name} loaded")
         self.pointer = 0 
 
@@ -28,15 +24,17 @@ class Intcode_computer():
         '''
         self.memory = self.program[:]
         self.pointer = 0
+        self.output_data = []
         logger.info("Computer running {self.program_name} reset")
 
         # instruction is n places long. Two least significant places are 
         # op code, remainder are the access modes 
     
-    def run(self):
+    def run(self,i_o_mode):
         '''
         executes the program currently in memory
         '''
+        self.i_o_mode = i_o_mode
         ### HELPERS
         def fetch_command():
             '''
@@ -140,7 +138,10 @@ class Intcode_computer():
             # logger.debug(f'Output {self.memory[self.pointer]}')
             logger.debug(f'Pointer is {self.pointer}')
             operand = fetch_operands(mode,1)
-            print(operand[0])
+            if not self.i_o_mode:
+                print(operand[0])
+            self.output_data.append(operand[0])
+            
 
             # self.pointer += 1 # increment pointer to next instruction
             return 1 
@@ -212,7 +213,11 @@ class Intcode_computer():
 
 
         # initialize address pointer
- 
+        if self.i_o_mode:  # if data is present at input use that instead of input from keyboard
+            self.input_data = (i for i in self.i_o_mode)
+        else:
+            self.input_data = None
+
         logger.debug(f'instruction pointer is {self.pointer}')
         # fetch first instruction
         op_code,modes = fetch_command()  
@@ -231,7 +236,7 @@ class Intcode_computer():
             
             op_code,modes = fetch_command()
 
-        return(self.memory[0])        
+        return(self.output_data)        
 
 
 
@@ -255,6 +260,10 @@ class PROGS():
 
     FIVETO9 = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]
 
+    AMPTEST1 = [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0]
+    AMPTEST2 = [3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0]
+    AMPTEST3 = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
+
 if __name__ == "__main__":
 
     ##############################################
@@ -262,6 +271,28 @@ if __name__ == "__main__":
     FORMAT = '%(asctime)-15s %(funcName)s:%(message)s'
     logging.basicConfig(format=FORMAT,level = logging.DEBUG,filename='Day_5\\runlog.txt')
     logger = logging.getLogger(__name__)
+
+    phase_settings = permutations([0,1,2,3,4])
+    max_thrust = 0
+    for a,b,c,d,e in phase_settings:
+        ampA = Intcode_computer("AMPA", AMP_PROGRAM)
+        ampB = Intcode_computer("AMPB", AMP_PROGRAM)
+        ampC = Intcode_computer("AMPC", AMP_PROGRAM)
+        ampD = Intcode_computer("AMPD", AMP_PROGRAM)
+        ampE = Intcode_computer("AMPE", AMP_PROGRAM)
+        
+        thrust = ampE.run([e,ampD.run([d,ampC.run([c,ampB.run([b,ampA.run([a,0])[0]])[0]])[0]])[0]])[0]
+        if thrust>max_thrust:
+            max_thrust = thrust
+            best_setting = [a,b,c,d,e]
+        ampA.reset()
+        ampB.reset()
+        ampC.reset()
+        ampD.reset()
+        ampE.reset()
+
+    print( f'Maximum thrust is {max_thrust} from setting {best_setting}')
+
 
 
 
@@ -296,13 +327,8 @@ if __name__ == "__main__":
     # jumptesti = Intcode_computer("Jump test immediate", PROGS.JUMPTESTI)
     # jumptesti.run()
 
-    test_data = [1,4,5,8,8,9,10]
-    FIVETO9 = Intcode_computer("Opcodes 5 to 9", PROGS.FIVETO9, test_data )
-    for d in range(len(test_data)):
+    # test_data = [1,4,5,8,8,9,10]
 
-        FIVETO9.run()
-        FIVETO9.reset()
-        
 
 
 
