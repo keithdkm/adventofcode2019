@@ -13,7 +13,9 @@ class Intcode_computer():
 
         self.output_data = []
         logger.info(f"Program {self.program_name} loaded")
+        self.suspend = False
         self.pointer = 0 
+        self.complete = False
 
     def __repr__(self):
         return  (f' Program: {self.program_name}, pointer {self.pointer}')
@@ -119,8 +121,14 @@ class Intcode_computer():
                         pass
             
             else:
-                # TODO Fetch the next input from the input list
-                i = next(self.input_data)
+                # TODO Fetch the next input from the input list until list exhausted
+                try:
+                    i = next(self.input_data)
+                except StopIteration:
+                    self.suspend = True
+                    self.pointer -= 1 # decrement pointer so that input instruction is reexecuted
+                    logger.debug('Amplifier {self.program_name} suspended', )
+                    return
                 
             self.memory[self.memory[self.pointer]]= i 
             logger.debug('User entered value %s. Written to location %s',int(i),self.memory[self.pointer])
@@ -222,7 +230,7 @@ class Intcode_computer():
         # fetch first instruction
         op_code,modes = fetch_command()  
         #Main loop 
-        while  op_code!=99:   # end of program reached
+        while  not (op_code==99 or self.suspend) :   # end of program reached
             try:   #  ensures that any memory reads or writes out of range are trapped
 
                 logger.debug(f'Function is "{EXECUTE[op_code].__name__}";  modes are {modes} ')  
@@ -234,10 +242,22 @@ class Intcode_computer():
                 print(e)
                 return 0   # if it fails return 0
             
-            op_code,modes = fetch_command()
-
+            if not self.suspend:
+                op_code,modes = fetch_command()
+            if op_code == 99:
+                self.complete = True
         return(self.output_data)        
 
+    def resume(self, new_input_data):
+        '''
+        restarts code where it left off when it suspended after input data ran out
+        '''
+        self.suspend = False
+        
+        self.i_o_mode = new_input_data
+        self.output_data = []
+        return self.run(new_input_data)
+        
 
 
 class PROGS():
@@ -264,27 +284,48 @@ class PROGS():
     AMPTEST2 = [3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0]
     AMPTEST3 = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
 
+    FEEDBACKT1 = [3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5]
+    FEEDBACKT2 = [3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10]
+    with open('Day_7\input.txt','r') as f:
+        AMP_PROGRAM = [int(s) for s in f.read().strip().split(',')]
+#####################################
+# R
 if __name__ == "__main__":
 
     ##############################################
     ## Logging Configuration
     FORMAT = '%(asctime)-15s %(funcName)s:%(message)s'
-    logging.basicConfig(format=FORMAT,level = logging.DEBUG,filename='Day_5\\runlog.txt')
+    logging.basicConfig(format=FORMAT,level = logging.DEBUG,filename='Day_7\\runlog.txt')
     logger = logging.getLogger(__name__)
 
-    phase_settings = permutations([0,1,2,3,4])
+
+    
+    all_possible_phase_settings = permutations([5,6,7,8,9])
     max_thrust = 0
-    for a,b,c,d,e in phase_settings:
-        ampA = Intcode_computer("AMPA", AMP_PROGRAM)
-        ampB = Intcode_computer("AMPB", AMP_PROGRAM)
-        ampC = Intcode_computer("AMPC", AMP_PROGRAM)
-        ampD = Intcode_computer("AMPD", AMP_PROGRAM)
-        ampE = Intcode_computer("AMPE", AMP_PROGRAM)
+    for phase_settings in all_possible_phase_settings:
+        ampA = Intcode_computer("AMPA", PROGS.AMP_PROGRAM)
+        ampB = Intcode_computer("AMPB", PROGS.AMP_PROGRAM)
+        ampC = Intcode_computer("AMPC", PROGS.AMP_PROGRAM)
+        ampD = Intcode_computer("AMPD", PROGS.AMP_PROGRAM)
+        ampE = Intcode_computer("AMPE", PROGS.AMP_PROGRAM)
+
+        Amp_array = [ampA,ampB,ampC,ampD,ampE]
         
-        thrust = ampE.run([e,ampD.run([d,ampC.run([c,ampB.run([b,ampA.run([a,0])[0]])[0]])[0]])[0]])[0]
-        if thrust>max_thrust:
-            max_thrust = thrust
-            best_setting = [a,b,c,d,e]
+        current_thrust = ampA.run([phase_settings[0],0])
+        for amp,phase_setting in zip(Amp_array[1:],phase_settings[1:]): # first run set phase setting for each amp
+            current_thrust = amp.run([phase_setting,current_thrust[0]])
+        complete = False
+
+        while not complete:
+            for amp in Amp_array:
+                current_thrust = amp.resume([current_thrust[0]])
+            complete = all(a.complete for a in Amp_array)
+
+    # print(current_thrust)
+
+        if current_thrust[0]>max_thrust:
+            max_thrust = current_thrust[0]
+            best_setting = phase_settings
         ampA.reset()
         ampB.reset()
         ampC.reset()
