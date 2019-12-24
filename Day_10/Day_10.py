@@ -3,6 +3,7 @@
 # for each point, calculate gradient and y intercept of straight line 
 # to every other point. Count number of unique lines
 # That is number of visible asteroids
+from math import sqrt,atan,pi
 from itertools import count
 
 class MAPS():
@@ -15,10 +16,10 @@ class AsteroidField():
 
     def __init__(self,fieldmap):
 
-        self.astlist = self.fetch(fieldmap)
+        self.asteroids_l = self.fetch(fieldmap)
 
     def __repr__ (self):
-         return f'an {self.width} by {self.length} asteroid field  with {len(self.astlist)} asteroids'
+         return f'an {self.width} by {self.length} asteroid field  with {len(self.asteroids_l)} asteroids'
 
     def fetch(self,fieldmap):
         '''
@@ -51,42 +52,71 @@ class AsteroidField():
                     best_asteroid = asteroid
 
         return best_asteroid,max_visible
+
+
+
+
+
 class Asteroid():
+    _count = count(0) 
     def __init__(self,name,x,y):
+        self.id = next(self._count)
         self.name = name
         self.x = x
         self.y = y
 
     def __repr__(self):
-        return f'Asteroid {self.name} at {self.x},{self.y}'
+        return f'Asteroid {self.id} at {self.x},{self.y}'
 
     def vector(self,other):
         '''
-        calculates the slope of line between two asteroids
+        calculates the slope of line and distance between two asteroids
         '''
-        if self.y==other.y:
-            if self.x==other.x:
-                return None
-            elif self.x < other.x:
-                m = 0.000000000001
-                c = self.y
-            else: 
-                m = -0.000000000001
-                c = self.y
-            return m,c
-
+       
         try:
-            m = ((self.y - other.y)/abs(self.x - other.x))
-            m1 = ((self.y - other.y)/(self.x - other.x))
-            c = (self.y-m1*self.x)
+            y = -(self.y - other.y)
+            x = -(self.x - other.x)
+            a =  atan (y/x) 
+            q = 0
+            if y<0:
+                q += 1
+                if x>0:
+                    q +=1
+            elif x < 0:
+                q += 1
+
+            r = a + (q*pi)
+            
+            d = sqrt(y**2+x**2)
         except ZeroDivisionError:
             if self.y > other.y :
-                m = float('Inf')
-                
-                
+                r = 1.5 * pi
+            else:
+                r = 0.5*pi
+           
+            d = abs(y)
+       
+        
+        r = round(r,2)
+        d = round(d,2)
+
+        return r,d
+
+
+    # all_asteroids = [(other_asteroid,best_asteroid.vector(other_asteroid)) for other_asteroid in Field.asteroids_l if\
+    #          asteroid.vector(other_asteroid)!=None]
+    # for asteroid in all_asteroids:
+    #     print(asteroid)
+
+    # print (len(all_asteroids))
+
+
+if __name__ == "__main__":
+
     Field = AsteroidField(MAPS.INPUT)
 
     best_location,visible = Field.best()
-            
+
     print(f'the best asteroid for the detector is {best_location} with {visible} visible asteroids')
 
+    
