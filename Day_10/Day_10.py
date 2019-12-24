@@ -3,23 +3,10 @@
 # for each point, calculate gradient and y intercept of straight line 
 # to every other point. Count number of unique lines
 # That is number of visible asteroids
-
+from itertools import count
 
 class MAPS():
-    with open('Day_10\\testinput0.txt','r') as f:
-        ZERO = f.readlines() 
-    with open('Day_10\\testinput1.txt','r') as f:
-        ONE = f.readlines() 
-    with open('Day_10\\testinput2.txt','r') as f:
-        TWO = f.readlines()
-    with open('Day_10\\testinput3.txt','r') as f:
-        THREE = f.readlines() 
-    with open('Day_10\\testinput4.txt','r') as f:
-        FOUR = f.readlines() 
-    with open('Day_10\\testinput5.txt','r') as f:
-        FIVE = f.readlines()     
-    with open('Day_10\\testinput6.txt','r') as f:
-        SIX = f.readlines() 
+
     with open('Day_10\\input.txt','r') as f:
         INPUT = f.readlines() 
 
@@ -49,6 +36,21 @@ class AsteroidField():
 
         return sorted(coord_list,key = lambda x:[x.x,x.y])
 
+    def best(self):
+
+    # print(Field.asteroids_l)
+        max_visible = 0
+        for i,asteroid in enumerate(self.asteroids_l):
+                # print(asteroid)
+                visible = {(asteroid.vector(other_asteroid)[0]) for other_asteroid in self.asteroids_l if\
+                             asteroid.vector(other_asteroid)!=None }
+                # print(visible)
+                # print (i,asteroid,len(visible))
+                if len(visible) > max_visible:
+                    max_visible = len(visible)
+                    best_asteroid = asteroid
+
+        return best_asteroid,max_visible
 class Asteroid():
     def __init__(self,name,x,y):
         self.name = name
@@ -82,24 +84,9 @@ class Asteroid():
                 m = float('Inf')
                 
                 
-            else:
-                m = float('-Inf')
-            c = None
+    Field = AsteroidField(MAPS.INPUT)
 
-        return m,c
+    best_location,visible = Field.best()
             
-Field1 = AsteroidField(MAPS.INPUT)
-# print(Field1.astlist)
-max_visible = 0
-vectors =set()
-for i,asteroid in enumerate(Field1.astlist):
-        visible = {(asteroid.vector(other_asteroid)) for other_asteroid in Field1.astlist if\
-                     asteroid.vector(other_asteroid)!=None}
-        # print (i,asteroid,len(visible))
-        if len(visible) > max_visible:
-            max_visible = len(visible)
-            best_asteroid = asteroid
-print()
-print (f'The best location for the monitoring station is {best_asteroid} with {max_visible} asteroids visible')
-print (visible)
+    print(f'the best asteroid for the detector is {best_location} with {visible} visible asteroids')
 
