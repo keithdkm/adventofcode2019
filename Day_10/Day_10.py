@@ -42,23 +42,27 @@ class AsteroidField():
     # print(Field.asteroids_l)
         max_visible = 0
         for i,asteroid in enumerate(self.asteroids_l):
-                # print(asteroid)
-                visible = {(asteroid.vector(other_asteroid)[0]) for other_asteroid in self.asteroids_l if\
-                             asteroid.vector(other_asteroid)!=None }
+            visible = set()
+            visible_list = []
+            for other_asteroid in self.asteroids_l:
+
+                vector = asteroid.vector(other_asteroid)
+                
+                if vector[1]!=0:
+                    visible.add(vector[0])
                 # print(visible)
                 # print (i,asteroid,len(visible))
-                if len(visible) > max_visible:
-                    max_visible = len(visible)
-                    best_asteroid = asteroid
+            if len(visible) > max_visible:
+                max_visible = len(visible)
+                best_asteroid = asteroid
+            visible_list = sorted(visible_list)
+            visible = sorted(visible)
 
-        return best_asteroid,max_visible
-
-
-
+        return (best_asteroid.x,best_asteroid.y),max_visible
 
 
 class Asteroid():
-    _count = count(0) 
+    _count = count(0)
     def __init__(self,name,x,y):
         self.id = next(self._count)
         self.name = name
@@ -72,33 +76,34 @@ class Asteroid():
         '''
         calculates the slope of line and distance between two asteroids
         '''
-       
-        try:
-            y = -(self.y - other.y)
-            x = -(self.x - other.x)
-            a =  atan (y/x) 
-            q = 0
-            if y<0:
-                q += 1
-                if x>0:
-                    q +=1
+        if self.y==other.y and self.x==other.x:
+            return 0,0
+        
+        y = (self.y - other.y)
+        x = -(self.x - other.x)
+        if x != 0:
+            a =  atan (y/x) / pi
+            if x>0  and y>=0 :
+                q = 0  # point in first quadrant
             elif x < 0:
-                q += 1
+                q = 1 # point in second or third quadrants
+            else:
+                q = 2  # point in fourth quadrant
 
-            r = a + (q*pi)
+            r = a + q
             
             d = sqrt(y**2+x**2)
-        except ZeroDivisionError:
+        else:
             if self.y > other.y :
-                r = 1.5 * pi
+                r = 0.5
             else:
-                r = 0.5*pi
+                r = 1.5
            
             d = abs(y)
        
         
-        r = round(r,2)
-        d = round(d,2)
+        r = round(r,4)
+        d = round(d,3)
 
         return r,d
 
