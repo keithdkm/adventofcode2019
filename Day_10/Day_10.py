@@ -5,6 +5,7 @@
 # That is number of visible asteroids
 from math import sqrt,atan,pi
 from itertools import count
+from collections import Counter
 
 class MAPS():
 
@@ -131,13 +132,20 @@ if __name__ == "__main__":
     print(f'the best asteroid for the detector is {best_asteroid} with {visible_count} visible asteroids')
     
     # print(sorted([(asteroid,best_asteroid.vector(asteroid)) for asteroid in Field.asteroids_l],key=lambda x: x[1][1]))
-    print([(asteroid,best_asteroid.vector(asteroid)) for asteroid in Field.asteroids_l])
+    asteroid_angles = ([best_asteroid.vector(asteroid)[0] for asteroid in Field.asteroids_l])
+    asteroid_lookup = {best_asteroid.vector(asteroid)[0]:asteroid for asteroid in Field.asteroids_l}
+    # print(asteroid_lookup)
+    asteroid_angles_counts = (Counter(asteroid_angles))
+    print(asteroid_lookup[sorted(asteroid_angles_counts.items())[199][0]])
+    # asteroid_200 = (sorted(k for k,d in asteroid_distances_counts.items() if d==1)[199])
+
+    # print (f'200th asteroid is {asteroid_lookup[asteroid_200]}')
 
 
-    # adjust radial postion by a quarter turn
-    # invert radial positions so that North is first, then East, south and West
+    # [X] adjust radial postion by a quarter turn
+    # [X] invert radial positions so that North is first, then East, south and West
     # [X] start with list of all asteroids sorteed by  their radial position wrt to best satellite and then distance
-    # generate counts for each unique radial position (use Counter from collections)
+    # [X] generate counts for each unique radial position (use Counter from collections)
     # loop through, removing 1 from each count, adding the number of lists at the start to the number
     # of asteroids destroyed.
     # If a count is zero, remove it from the list ( or possibly leave it and not count it in above step of count < 0)
