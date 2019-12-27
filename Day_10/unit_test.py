@@ -22,27 +22,27 @@ class Test_Asteroid_vector(unittest.TestCase):
         
 
     def test_north(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_north),(0.5,1))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_north),(0.0,1))
     
     def test_south(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_south), (1.5,1))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_south), (1.0,1))
 
     def test_west(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_west), (1,1))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_west), (1.5,1))
 
     def test_east(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_east), (0,1))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_east), (0.5,1))
 
     def test_north_east(self):
         self.assertEqual(self.Origin_asteroid.vector(self.asteroid_north_east), (0.25,self.root2))
     def test_NNE(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_NNE)[0], 0.3524)
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_NNE)[0], 0.1476)
 
     def test_north_west(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_north_west), (0.75,self.root2))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_north_west), (1.75,self.root2))
 
     def test_south_east(self):
-        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_south_east), (1.75,self.root2))
+        self.assertEqual(self.Origin_asteroid.vector(self.asteroid_south_east), (0.75,self.root2))
 
     def test_south_west(self):
         self.assertEqual(self.Origin_asteroid.vector(self.asteroid_south_west), (1.25,self.root2))
@@ -65,23 +65,23 @@ class Test_final_output_Day10_part1(unittest.TestCase):
         with open('Day_10\\testinput6.txt','r') as f:
             self.SIX = f.readlines() 
 
-        self.ER_ZERO = (3,4),8
-        self.ER_ONE  = (5,8),33
-        self.ER_TWO =  (1,2),35
-        self.ER_THREE = (6,3),41
-        self.ER_FOUR = (11,13),210
+        self.ER_ZERO = 8
+        self.ER_ONE  = 33
+        self.ER_TWO =  35
+        self.ER_THREE = 41
+        self.ER_FOUR = 210
 
 
     def test_0(self):
-        self.assertEqual(AsteroidField(self.ZERO).best(),self.ER_ZERO)
+        self.assertEqual(AsteroidField(self.ZERO).best()[1],self.ER_ZERO)
     def test_1(self):
-        self.assertEqual(AsteroidField(self.ONE).best(),self.ER_ONE)
+        self.assertEqual(AsteroidField(self.ONE).best()[1],self.ER_ONE)
     def test_2(self):
-        self.assertEqual(AsteroidField(self.TWO).best(),self.ER_TWO)
+        self.assertEqual(AsteroidField(self.TWO).best()[1],self.ER_TWO)
     def test_3(self):
-        self.assertEqual(AsteroidField(self.THREE).best(),self.ER_THREE)
+        self.assertEqual(AsteroidField(self.THREE).best()[1],self.ER_THREE)
     def test_4(self):
-        self.assertEqual(AsteroidField(self.FOUR).best(),self.ER_FOUR)
+        self.assertEqual(AsteroidField(self.FOUR).best()[1],self.ER_FOUR)
 
 if __name__ == "__main__":
     unittest.main()

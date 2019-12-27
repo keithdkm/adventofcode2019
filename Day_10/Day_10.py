@@ -13,7 +13,8 @@ class MAPS():
 
 
 class AsteroidField():
-
+    ''' list of all asteroids in field
+    '''
     def __init__(self,fieldmap):
 
         self.asteroids_l = self.fetch(fieldmap)
@@ -38,27 +39,24 @@ class AsteroidField():
         return sorted(coord_list,key = lambda x:[x.x,x.y])
 
     def best(self):
-
-    # print(Field.asteroids_l)
         max_visible = 0
         for i,asteroid in enumerate(self.asteroids_l):
             visible = set()
-            visible_list = []
-            for other_asteroid in self.asteroids_l:
+            
+            for other_asteroid in [a for a in self.asteroids_l if a!=asteroid]:
 
                 vector = asteroid.vector(other_asteroid)
                 
                 if vector[1]!=0:
                     visible.add(vector[0])
-                # print(visible)
-                # print (i,asteroid,len(visible))
+                   
+
             if len(visible) > max_visible:
                 max_visible = len(visible)
                 best_asteroid = asteroid
-            visible_list = sorted(visible_list)
-            visible = sorted(visible)
+            
 
-        return (best_asteroid.x,best_asteroid.y),max_visible
+        return best_asteroid,max_visible
 
 
 class Asteroid():
@@ -77,33 +75,38 @@ class Asteroid():
         calculates the slope of line and distance between two asteroids
         '''
         if self.y==other.y and self.x==other.x:
-            return 0,0
+            return 0,0    # asteroid is itself
         
         y = (self.y - other.y)
         x = -(self.x - other.x)
-        if x != 0:
-            a =  atan (y/x) / pi
-            if x>0  and y>=0 :
-                q = 0  # point in first quadrant
-            elif x < 0:
-                q = 1 # point in second or third quadrants
+        if y != 0:
+            try:
+                a =  atan (y/x) / pi
+            except ZeroDivisionError:
+                if y<0:                    
+                    r = 1
+                else:
+                    r = 0
             else:
-                q = 2  # point in fourth quadrant
+                if x>=0 :
+                    q = 0.5  # asteroid in first quadrant
+                else:
+                    q = 1.5  # asteroid in fourth quadrant
 
-            r = a + q
-            
-            d = sqrt(y**2+x**2)
-        else:
-            if self.y > other.y :
-                r = 0.5
-            else:
+                r = q - a
+            finally: 
+                d = sqrt(y**2+x**2)
+
+        else:    # handles asteroids that are directly east or west
+            if self.x > other.x :
                 r = 1.5
-           
-            d = abs(y)
-       
-        
-        r = round(r,4)
-        d = round(d,3)
+            else:
+                r = 0.5
+
+            d = abs(x)
+
+        r = round(r,4)   # radial psotion of other asteroid in relation to self
+        d = round(d,3)   # distance of pther asteroid from self
 
         return r,d
 
@@ -118,10 +121,27 @@ class Asteroid():
 
 if __name__ == "__main__":
 
-    Field = AsteroidField(MAPS.INPUT)
+    Field = AsteroidField(MAPS.INPUT)   #bould field of all asteroids
 
-    best_location,visible = Field.best()
+    best_asteroid,visible_count = Field.best()
 
-    print(f'the best asteroid for the detector is {best_location} with {visible} visible asteroids')
+    print()
+    print('PART ONE')
 
+    print(f'the best asteroid for the detector is {best_asteroid} with {visible_count} visible asteroids')
     
+    # print(sorted([(asteroid,best_asteroid.vector(asteroid)) for asteroid in Field.asteroids_l],key=lambda x: x[1][1]))
+    print([(asteroid,best_asteroid.vector(asteroid)) for asteroid in Field.asteroids_l])
+
+
+    # adjust radial postion by a quarter turn
+    # invert radial positions so that North is first, then East, south and West
+    # [X] start with list of all asteroids sorteed by  their radial position wrt to best satellite and then distance
+    # generate counts for each unique radial position (use Counter from collections)
+    # loop through, removing 1 from each count, adding the number of lists at the start to the number
+    # of asteroids destroyed.
+    # If a count is zero, remove it from the list ( or possibly leave it and not count it in above step of count < 0)
+    # if asteroids destroyed count>200, fugure out which of the radials contained the 200th. 
+    # The number of completed loops - 1 is the index of the asteroid
+    # go back to original list and retrieve asteroid coords
+    # calcualt output
