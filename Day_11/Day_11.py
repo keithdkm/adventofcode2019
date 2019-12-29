@@ -5,7 +5,7 @@ DIRECTION = {    0:('Up',(0,1)),
             1:('Right',(1,0)),
             2:('Down',(0,-1)),
             3:('Left',(-1,0))}
-COLOR = {0:'Black',1:'White'}
+COLOR = {0:('Black',' '),1:('White','#')}
 
 
 class Intcode_computer():
@@ -18,7 +18,7 @@ class Intcode_computer():
             quit()
         self.program = program
         
-        self.memory = [0 for i in range(required_memory)]
+        self.memory = [0 for i in range(required_memory)]  #initialize required memory
         self.memory[:len(self.program)] = self.program[:] # 
 
         self.program_name = program_name
@@ -293,7 +293,7 @@ class Intcode_computer():
 class spaceShip():
 
     def __init__(self):
-        self.side_of_ship = {(0,0): 0}   #  dict containing colors of panels on side of ship
+        self.side_of_ship = {(0,0): 1}   #  dict containing colors of panels on side of ship
 
     def __repr__(self):
         return f'The side of the ship is {self.side_of_ship.items()}'
@@ -310,7 +310,20 @@ class spaceShip():
         else:
             raise Exception(f'Invalid paint color at {panel} ')
 
-    
+    def display_side(self):
+        
+        all_x_values = [x for x,_ in self.side_of_ship.keys()]
+        all_y_values = [y for _,y in self.side_of_ship.keys()]
+        res=[]
+        for y in range(max(all_y_values),min(all_y_values)-1,-1):
+            line = []
+            for x in range(min(all_x_values),max(all_x_values)+1):
+                line.append(COLOR[self.side_of_ship.get((x,y),0)][1])
+            line=''.join(line)
+            res.append(line)
+        res='\n'.join(res)
+        return res
+            
 
 class paintingRobot():
     def __init__(self,ship):    # pass in the ship robot is painting
@@ -347,6 +360,7 @@ class paintingRobot():
     def paintPanel(self,color):
         ''' paints the color of current panel to the requested color'''
         self.ship.set_panel_color(self.location,color)
+        print (f'Painted panel {COLOR[color][0]}')
 
     def paintShip(self):
         '''
@@ -388,8 +402,9 @@ if __name__ == '__main__':
     # aRobot.move(0)
     # aRobot.paintPanel(1)
     print(aRobot)
-    print(myShip)
-    print (f'the robot painted {aRobot.visitedPanelsCount} different panels, {aRobot.visited}')
+    print(myShip.display_side())
+    
+    print (f'the robot painted {aRobot.visitedPanelsCount} different panels')
 
 
     
