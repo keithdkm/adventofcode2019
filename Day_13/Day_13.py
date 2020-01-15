@@ -285,10 +285,37 @@ class Intcode_computer():
  
 
 
+TILESET = {
+    0: ('BLANK',' '),
+    1: ('WALL','#'),
+    2: ('BLOCK','X'),
+    3: ('PADDLE','-'),
+    4: ('BALL','O')
+}
+
+class Screen():
+    '''
+    creates and displays array to hold screen display data
+    '''
+    def __init__(self):
+        self.screen = np.empty((44,24),dtype = 'str')
+
+    def setchar(self,x,y,char):
+        '''
+        set position x,y to character char
+        '''
+        self.screen[x,y] = TILESET[char][1]
+
+    def displayscreen(self):
+        '''
+        display contents of screen memory
+        '''
+        for y in range(24):
+            print ("".join(c for c in self.screen[:,y]))
 
 
 if __name__=='__main__':
-
+    
     logger = logging.getLogger(__name__)
 
     with open ('Day_13\\input.txt','r') as f:
@@ -301,11 +328,22 @@ if __name__=='__main__':
 
     game_output = game_output.reshape(len(game_output)//3,3)
 
-    num_block_prints = game_output[game_output[:,2]==2,:]
+    
+    num_block_prints = game_output[game_output[:,2]==2,:]   # select only those instructions that draw blocks
+    readable_game_output = [(line[0],line[1],TILESET[line[2]][0]) for line in game_output]
+    with open('Day_13\gameoutput.txt','w') as f:
+        f.writelines([str(line)+'\n' for line in readable_game_output ])
 
-    print(num_block_prints.shape)
+    print(f'Part 1 - {num_block_prints.shape[0]} blocks')
 
-    # print(game_output)
+    game_screen = Screen()
+
+    for x,y,char in game_output:
+        game_screen.setchar(x,y,char)
+    
+    game_screen.displayscreen()
+
+    
 
     
 
